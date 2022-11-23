@@ -15,6 +15,11 @@ dependencies {
     testImplementation project(":kotlinx-serialization-properties")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+}
+
 sourceSets.test {
     java.srcDirs("example", "test")
 }
