@@ -139,7 +139,7 @@ internal class StreamingJsonEncoder(
                 if (!composer.writingFirst)
                     composer.print(COMMA)
                 composer.nextItem()
-                encodeString(descriptor.getElementName(index))
+                encodeString(descriptor.getJsonElementName(json, index))
                 composer.print(COLON)
                 composer.space()
             }
@@ -220,6 +220,6 @@ internal class StreamingJsonEncoder(
     override fun encodeString(value: String) = composer.printQuoted(value)
 
     override fun encodeEnum(enumDescriptor: SerialDescriptor, index: Int) {
-        encodeString(enumDescriptor.getElementName(index))
+        encodeString(enumDescriptor.getJsonElementName(json, index))
     }
 }
