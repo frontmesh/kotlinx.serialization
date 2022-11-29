@@ -168,7 +168,7 @@ class JsonNamingStrategyTest : JsonTestBase() {
     data class Holder(val testBase: SealedBase, val testMid: SealedBase.SealedMid)
 
     @Test
-    fun testNamingStrategyDoesNotAffectPolymorphism() {
+    fun testNamingStrategyDoesNotAffectPolymorphism() = noLegacyJs { // @JsonClassDiscriminator
         val json = Json(jsonWithNaming) {
             classDiscriminator = "typeBase"
         }
