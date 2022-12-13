@@ -29,7 +29,7 @@ internal fun SerialDescriptor.buildDeserializationNamesMap(json: Json): Map<Stri
     }
 
     val builder: MutableMap<String, Int> =
-        mutableMapOf() // can be not concurrent because it is only read after creation and never written to?
+        mutableMapOf() // can be not concurrent because it is only read after creation and safely published to concurrent map
     val strategy = namingStrategy(json)
     for (i in 0 until elementsCount) {
         getElementAnnotations(i).filterIsInstance<JsonNames>().singleOrNull()?.names?.forEach { name ->

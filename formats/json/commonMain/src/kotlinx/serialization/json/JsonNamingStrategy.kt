@@ -26,7 +26,7 @@ import kotlinx.serialization.descriptors.*
  * * Collision of the transformed name with any other (transformed) properties serial names or any alternative names
  * specified with [JsonNames] will lead to a deserialization exception.
  *
- * * Naming strategies do not transform serial names of the classes used for the polymorphism, as they always should be specified explicitly.
+ * * Naming strategies do not transform serial names of the types used for the polymorphism, as they always should be specified explicitly.
  * Values from [JsonClassDiscriminator] or global [JsonBuilder.classDiscriminator] also are not altered.
  *
  * ### Controversy about using global naming strategies

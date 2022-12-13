@@ -112,9 +112,15 @@ private open class DynamicInput(
         }
         // Slow path
         val deserializationNamesMap = json.deserializationNamesMap(descriptor)
-        val nameInObject = (keys as Array<String>).find { deserializationNamesMap[it] == index }
-        val fallbackName = strategy?.serialNameForJson(descriptor, index, descriptor.getElementName(index)) // Key not found exception should be thrown with transformed name, not original
-        return nameInObject ?: fallbackName ?: mainName
+        (keys as Array<String>).find { deserializationNamesMap[it] == index }?.let {
+            return it
+        }
+        val fallbackName = strategy?.serialNameForJson(
+            descriptor,
+            index,
+            mainName
+        ) // Key not found exception should be thrown with transformed name, not original
+        return fallbackName ?: mainName
     }
 
     override fun decodeTaggedEnum(tag: String, enumDescriptor: SerialDescriptor): Int {

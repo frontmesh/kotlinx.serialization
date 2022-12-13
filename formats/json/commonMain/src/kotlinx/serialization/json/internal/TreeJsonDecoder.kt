@@ -134,7 +134,7 @@ private sealed class AbstractJsonTreeDecoder(
 
     override fun decodeTaggedChar(tag: String): Char = getPrimitiveValue(tag).primitive("char") { content.single() }
 
-    private inline fun <T: Any> JsonPrimitive.primitive(primitive: String, block: JsonPrimitive.() -> T?): T {
+    private inline fun <T : Any> JsonPrimitive.primitive(primitive: String, block: JsonPrimitive.() -> T?): T {
         try {
             return block() ?: unparsedPrimitive(primitive)
         } catch (e: IllegalArgumentException) {
@@ -236,9 +236,16 @@ private open class JsonTreeDecoder(
         }
         // Slow path
         val deserializationNamesMap = json.deserializationNamesMap(descriptor)
-        val nameInObject = value.keys.find { deserializationNamesMap[it] == index }
-        val fallbackName = strategy?.serialNameForJson(descriptor, index, descriptor.getElementName(index)) // Key not found exception should be thrown with transformed named, not original
-        return nameInObject ?: fallbackName ?: baseName
+        value.keys.find { deserializationNamesMap[it] == index }?.let {
+            return it
+        }
+
+        val fallbackName = strategy?.serialNameForJson(
+            descriptor,
+            index,
+            baseName
+        ) // Key not found exception should be thrown with transformed name, not original
+        return fallbackName ?: baseName
     }
 
     override fun currentElement(tag: String): JsonElement = value.getValue(tag)
@@ -259,10 +266,10 @@ private open class JsonTreeDecoder(
 
         @Suppress("DEPRECATION_ERROR")
         val names: Set<String> = when {
-                strategy == null && !configuration.useAlternativeNames -> descriptor.jsonCachedSerialNames()
-                strategy != null -> json.deserializationNamesMap(descriptor).keys
-                else -> descriptor.jsonCachedSerialNames() + json.schemaCache[descriptor, JsonDeserializationNamesKey]?.keys.orEmpty()
-            }
+            strategy == null && !configuration.useAlternativeNames -> descriptor.jsonCachedSerialNames()
+            strategy != null -> json.deserializationNamesMap(descriptor).keys
+            else -> descriptor.jsonCachedSerialNames() + json.schemaCache[descriptor, JsonDeserializationNamesKey]?.keys.orEmpty()
+        }
 
         for (key in value.keys) {
             if (key !in names && key != polyDiscriminator) {
