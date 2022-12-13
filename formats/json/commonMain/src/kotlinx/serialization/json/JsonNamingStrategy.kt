@@ -55,7 +55,7 @@ public fun interface JsonNamingStrategy {
      * For example, one can choose different transformations depending on [SerialInfo]
      * annotations (see [SerialDescriptor.getElementAnnotations]) or element optionality (see [SerialDescriptor.isElementOptional]).
      *
-     * Note that some of the invocations of this function may be cached for performance reasons.
+     * Note that invocations of this function are cached for performance reasons.
      * Caching strategy is an implementation detail and shouldn't be assumed as a part of the public API contract, as it may be changed in future releases.
      * Therefore, it is essential for this function to be pure: it should not have any side effects, and it should
      * return the same String for a given [descriptor], [elementIndex], and [serialName], regardless of the number of invocations.

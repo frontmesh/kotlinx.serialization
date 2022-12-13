@@ -14,6 +14,9 @@ import kotlin.native.concurrent.*
 @SharedImmutable
 internal val JsonDeserializationNamesKey = DescriptorSchemaCache.Key<Map<String, Int>>()
 
+@SharedImmutable
+internal val JsonSerializationNamesKey = DescriptorSchemaCache.Key<Array<String>>()
+
 internal fun SerialDescriptor.buildDeserializationNamesMap(json: Json): Map<String, Int> {
     fun MutableMap<String, Int>.putOrThrow(name: String, index: Int) {
         if (name in this) {
@@ -37,10 +40,19 @@ internal fun SerialDescriptor.buildDeserializationNamesMap(json: Json): Map<Stri
     return builder.ifEmpty { emptyMap() }
 }
 
+internal fun Json.deserializationNamesMap(descriptor: SerialDescriptor): Map<String, Int> =
+    schemaCache.getOrPut(descriptor, JsonDeserializationNamesKey) { descriptor.buildDeserializationNamesMap(this) }
+
+internal fun SerialDescriptor.serializationNamesMap(json: Json, strategy: JsonNamingStrategy): Array<String> = json.schemaCache.getOrPut(this, JsonSerializationNamesKey) {
+    Array(elementsCount) { i ->
+        val baseName = getElementName(i)
+        strategy.serialNameForJson(this, i, baseName)
+    }
+}
+
 internal fun SerialDescriptor.getJsonElementName(json: Json, index: Int): String {
-    val baseName = getElementName(index)
-    return namingStrategy(json)?.serialNameForJson(this, index, baseName)
-        ?: baseName // todo: measure this plain approach vs caching
+    val strategy = namingStrategy(json)
+    return if (strategy == null) getElementName(index) else serializationNamesMap(json, strategy)[index]
 }
 
 internal fun SerialDescriptor.namingStrategy(json: Json) = when (kind) {
@@ -48,10 +60,6 @@ internal fun SerialDescriptor.namingStrategy(json: Json) = when (kind) {
     StructureKind.CLASS -> json.configuration.namingStrategyForProperties
     else -> null
 }
-
-internal fun Json.deserializationNamesMap(descriptor: SerialDescriptor): Map<String, Int> =
-    schemaCache.getOrPut(descriptor, JsonDeserializationNamesKey) { descriptor.buildDeserializationNamesMap(this) }
-
 
 /**
  * Serves same purpose as [SerialDescriptor.getElementIndex] but respects
